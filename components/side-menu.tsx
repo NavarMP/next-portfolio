@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -30,29 +30,58 @@ export default function SideMenu() {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null)
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
 
-  const handleMouseEnter = () => {
-    if (hoverTimeout) clearTimeout(hoverTimeout)
-    setIsHovering(true)
-  }
-
-  const handleMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setIsHovering(false)
-    }, 300)
-    setHoverTimeout(timeout as NodeJS.Timeout)
-  }
-
+  // Clear any existing timeout when component unmounts
   useEffect(() => {
     return () => {
-      if (hoverTimeout) clearTimeout(hoverTimeout)
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
     }
-  }, [hoverTimeout])
+  }, [])
 
+  // Close menu when navigating to a new page
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
+
+  // Handle mouse enter on the trigger area
+  const handleMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+      hoverTimeoutRef.current = null
+    }
+    setIsHovering(true)
+  }
+
+  // Handle mouse leave on the trigger area
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+    }
+
+    // Only set a timeout if we're not already in the menu
+    if (!isOpen) {
+      hoverTimeoutRef.current = setTimeout(() => {
+        setIsHovering(false)
+      }, 300)
+    }
+  }
+
+  // Handle mouse leave on the menu itself
+  const handleMenuMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+    }
+
+    hoverTimeoutRef.current = setTimeout(() => {
+      if (!isOpen) {
+        setIsHovering(false)
+      }
+    }, 300)
+  }
 
   const navItems = [
     { href: "/", label: t("home"), icon: <Home className="h-5 w-5 mr-2" /> },
@@ -75,12 +104,15 @@ export default function SideMenu() {
 
   return (
     <>
+      {/* Trigger area */}
       <div
-        className="fixed left-0 top-0 bottom-0 w-2 z-40"
+        ref={triggerRef}
+        className="fixed left-0 top-0 bottom-0 w-6 z-40"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       />
 
+      {/* Menu button */}
       <Button
         variant="outline"
         size="icon"
@@ -90,6 +122,7 @@ export default function SideMenu() {
         {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
       </Button>
 
+      {/* Side menu */}
       <AnimatePresence>
         {(isOpen || isHovering) && (
           <motion.div
@@ -98,6 +131,13 @@ export default function SideMenu() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+            onMouseEnter={() => {
+              if (hoverTimeoutRef.current) {
+                clearTimeout(hoverTimeoutRef.current)
+                hoverTimeoutRef.current = null
+              }
+            }}
+            onMouseLeave={handleMenuMouseLeave}
           >
             <div className="flex flex-col h-full p-6">
               <div className="flex items-center justify-center py-6">

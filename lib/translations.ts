@@ -66,6 +66,11 @@ export const translations = {
     playAudio: "Play Background Audio",
     muteAudio: "Mute Background Audio",
     volumeControl: "Volume Control",
+
+    // Theme
+    light: "Light",
+    dark: "Dark",
+    system: "System",
   },
   ml: {
     // General
@@ -135,6 +140,11 @@ export const translations = {
     playAudio: "പശ്ചാത്തല ഓഡിയോ പ്ലേ ചെയ്യുക",
     muteAudio: "പശ്ചാത്തല ഓഡിയോ മ്യൂട്ട് ചെയ്യുക",
     volumeControl: "വോളിയം നിയന്ത്രണം",
+
+    // Theme
+    light: "വെളിച്ചം",
+    dark: "ഇരുട്ട്",
+    system: "സിസ്റ്റം",
   },
   ar: {
     // General
@@ -201,6 +211,11 @@ export const translations = {
     playAudio: "تشغيل الصوت الخلفي",
     muteAudio: "كتم الصوت الخلفي",
     volumeControl: "التحكم في مستوى الصوت",
+
+    // Theme
+    light: "فاتح",
+    dark: "داكن",
+    system: "النظام",
   },
 }
 
